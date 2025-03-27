@@ -1,0 +1,77 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# C extensions
+*.so
+
+# Distribución / empaquetado
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# PyInstaller
+*.spec
+
+# Logs de instalador
+pip-log.txt
+pip-delete-this-directory.txt
+
+# Pruebas unitarias / coverage
+htmlcov/
+.tox/
+.nox/
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+*.py,cover
+.hypothesis/
+.pytest_cache/
+cover/
+
+# Entornos virtuales
+.venv/
+venv/
+env/
+ENV/
+env.bak/
+venv.bak/
+.env
+
+# Archivos de configuración de PyCharm
+.idea/
+*.iml
+
+# Mypy
+.mypy_cache/
+.dmypy.json
+dmypy.json
+
+# Pyre
+.pyre/
+
+# Otros archivos no deseados (opcional)
+.DS_Store
+Thumbs.db
+
+# VizDoom
+_vizdoom.ini
