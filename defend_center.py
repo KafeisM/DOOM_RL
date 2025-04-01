@@ -1,56 +1,24 @@
-# Imports de bibliotecas estándar
-import os
-import time
-import random
-# Imports de bibliotecas científicas
-import numpy as np
-import cv2
-from matplotlib import pyplot as plt
-
-# Imports de VizDoom
-import vizdoom as vzd
-
-# Imports de Gymnasium
-import gymnasium as gym
-from gymnasium.spaces import Discrete, Box
-
-# Imports de Stable Baselines 3
+#import PPO for training
 from stable_baselines3 import PPO
-from stable_baselines3.common.callbacks import BaseCallback
+from DoomEnv import BaseVizDoomEnv  # Importar la clase específica
+from callbacks import TrainAndLoggingCallback
+
+class DefendCenterEnv(BaseVizDoomEnv):
+    def __init__(self, render=False):
+        super().__init__("./ViZDoom/scenarios/defend_the_center.cfg", 3, render)
+
+
 
 def main():
-    # Setup game
-    game = vzd.DoomGame()
-    game.load_config("./ViZDoom/scenarios/defend_the_center.cfg")
-    game.init()
+    CHECKPOINT_DIR = 'train/train_defend_center'
+    LOG_DIR = 'logs/log_defend_center'
 
-    # This is the set of actions we can take in the environment
-    actions = np.identity(7, dtype=np.uint8)
-    state = game.get_state()
-    print(state.game_variables)
+    callback = TrainAndLoggingCallback(check_freq=20000, save_path=CHECKPOINT_DIR)
 
-    # Loop thorugh episodes
-    episodes = 10
-    for episode in range(episodes):
-        # Create a new episode or game
-        game.new_episode()
-        # Checking hte game isn't finish
-        while not game.is_episode_finished():
-            # Get the game state
-            state = game.get_state()
-            # Get the game image
-            img = state.screen_buffer
-            # Get the game variables - ammo
-            info = state.game_variables
-            # Take an action
-            reward = game.make_action(random.choice(actions), 4)
-            # Print reward
-            print('Reward:', reward)
-            time.sleep(0.02)
-        print('Result:', game.get_total_reward())
-        time.sleep(2)
+    env = DefendCenterEnv()
+    model = PPO('CnnPolicy', env, tensorboard_log=LOG_DIR, verbose=1, learning_rate=0.0001, n_steps=4096)
+    model.learn(total_timesteps=20000, callback=callback)
 
-    game.close()
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()
