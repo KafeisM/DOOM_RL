@@ -13,11 +13,11 @@ def main():
     CHECKPOINT_DIR = 'train/train_defend_center'
     LOG_DIR = 'logs/log_defend_center'
 
-    callback = TrainAndLoggingCallback(check_freq=20000, save_path=CHECKPOINT_DIR)
+    callback = TrainAndLoggingCallback(check_freq=10000, save_path=CHECKPOINT_DIR)
 
     env = DefendCenterEnv()
     model = PPO('CnnPolicy', env, tensorboard_log=LOG_DIR, verbose=1, learning_rate=0.0001, n_steps=4096)
-    model.learn(total_timesteps=20000, callback=callback)
+    model.learn(total_timesteps=100000, callback=callback)
 
 
 if __name__ == "__main__":

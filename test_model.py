@@ -5,7 +5,7 @@ from stable_baselines3.common.evaluation import evaluate_policy
 
 def main():
     # Cargar modelo entrenado
-    model = PPO.load("train/train_defend_center/best_model_20000.zip")
+    model = PPO.load("train/train_defend_center/best_model_100000.zip")
 
     # Crear el mismo entorno que se usó para entrenar, pero con render=True
     env = DefendCenterEnv(render=True)
