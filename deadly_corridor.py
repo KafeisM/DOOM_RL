@@ -21,19 +21,25 @@ from stable_baselines3.common.callbacks import BaseCallback
 def main():
     # Setup game
     game = vzd.DoomGame()
-    game.load_config("./ViZDoom/scenarios/deadly_corridor.cfg")
+    game.load_config("Scenarios/deadly_corridor/deadly_corridor - t5.cfg")
+    
+    # Inicializar el juego antes de obtener cualquier estado
     game.init()
 
     # This is the set of actions we can take in the environment
     actions = np.identity(7, dtype=np.uint8)
-    state = game.get_state()
-    print(state.game_variables)
-
+    
     # Loop thorugh episodes
     episodes = 10
     for episode in range(episodes):
         # Create a new episode or game
         game.new_episode()
+        
+        # Ahora podemos obtener el estado de manera segura
+        state = game.get_state()
+        if state is not None:
+            print(state.game_variables)
+            
         # Checking hte game isn't finish
         while not game.is_episode_finished():
             # Get the game state
@@ -43,7 +49,7 @@ def main():
             # Get the game variables - ammo
             info = state.game_variables
             # Take an action
-            reward = game.make_action(random.choice(actions), 4)
+            reward = game.make_action(random.choice(actions), 7)
             # Print reward
             print('Reward:', reward)
             time.sleep(0.02)
