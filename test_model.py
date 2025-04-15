@@ -1,14 +1,15 @@
 import time
 from stable_baselines3 import PPO
 from defend_center import DefendCenterEnv  # Importar el entorno correcto
+from prueba import BaseVizDoomEnvPrueba
 from stable_baselines3.common.evaluation import evaluate_policy
 
 def main():
     # Cargar modelo entrenado
-    model = PPO.load("train/train_defend_center/best_model_100000.zip")
+    model = PPO.load("train/train_deadly_corridor/best_model_400000.zip")
 
     # Crear el mismo entorno que se usó para entrenar, pero con render=True
-    env = DefendCenterEnv(render=True)
+    env = BaseVizDoomEnvPrueba(render=True, scenario_path="./Scenarios/deadly_corridor/deadly_corridor - t1.cfg", num_actions=7)
     print(f"Observation space: {env.observation_space}")
     print(f"Action space: {env.action_space}")
 
@@ -17,7 +18,7 @@ def main():
     # print(f"Mean reward: {mean_reward:.2f} +/- {std_reward:.2f}")
 
     # Opción 2: Prueba manual con visualización
-    for episode in range(5):  # Jugar 5 episodios
+    for episode in range(15):  # Jugar 15 episodios
         obs, info = env.reset()
         done = False
         total_reward = 0
