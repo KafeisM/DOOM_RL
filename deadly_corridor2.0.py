@@ -1,6 +1,6 @@
 from stable_baselines3 import PPO
-from callbacks import TrainAndLoggingCallback
-from DoomEnvRew import VizDoomGymReward 
+from common.callbacks import TrainAndLoggingCallback
+from common.DoomEnvRew import VizDoomGymReward
 
 def main():
     CHECKPOINT_DIR = 'train/train_deadly_corridor2.0'

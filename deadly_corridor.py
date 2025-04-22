@@ -1,7 +1,7 @@
 # Imports necesarios
 from stable_baselines3 import PPO
-from callbacks import TrainAndLoggingCallback
-from prueba import BaseVizDoomEnvPrueba  # Importar la clase base de prueba.py
+from common.callbacks import TrainAndLoggingCallback
+from common.prueba import BaseVizDoomEnvPrueba  # Importar la clase base de prueba.py
 
 
 class DeadlyCorridorEnv(BaseVizDoomEnvPrueba):

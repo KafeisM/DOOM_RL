@@ -1,9 +1,8 @@
 #import PPO for training
 from stable_baselines3 import PPO
-from DoomEnv import BaseVizDoomEnv
-from callbacks import TrainAndLoggingCallback
+from common.callbacks import TrainAndLoggingCallback
 
-from DoomEnvRew import BaseVizDoomEnvPrueba  # Importar la clase base
+from common.DoomEnvRew import BaseVizDoomEnvPrueba  # Importar la clase base
 
 class DefendCenterEnv(BaseVizDoomEnvPrueba):
     def __init__(self, render=False):
