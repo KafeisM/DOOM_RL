@@ -12,8 +12,7 @@ def main():
     env_args = {
         'scenario': 'basic',
         'frame_skip': 4,
-        'frame_processor': lambda frame: cv2.resize(
-            frame, None, fx=.5, fy=.5, interpolation=cv2.INTER_AREA)
+        'frame_processor': envs.default_frame_processor
     }
 
 
