@@ -2,10 +2,11 @@ import time
 from stable_baselines3 import PPO
 from stable_baselines3.common.evaluation import evaluate_policy
 from common.DoomEnv import BaseVizDoomEnv  # Importamos la clase correcta
+from common.EnvRew import VizDoomEnv
 
 def main():
     # Cargar modelo entrenado (ajusta la ruta si es necesario)
-    model_path = "train/train_defend_center/best_model_100000.zip"
+    model_path = "models/nivel5/best_model.zip"
     try:
         model = PPO.load(model_path)
         print(f"Modelo cargado exitosamente: {model_path}")
@@ -14,13 +15,12 @@ def main():
         return
 
     # Crear el mismo entorno que se usó para entrenar
-    scenario_path = "./ViZDoom/scenarios/defend_the_center.cfg"
+    scenario_path = "Scenarios/deadly_corridor/deadly_corridor - t1.cfg"
     num_actions = 3  # left, right, shoot
     
     try:
-        env = BaseVizDoomEnv(
-            scenario_path=scenario_path,
-            num_actions=num_actions,
+        env = VizDoomEnv(
+            scenario_path,
             render=True  # Activamos la visualización
         )
         print("Entorno creado correctamente")
