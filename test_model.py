@@ -6,7 +6,7 @@ from common.EnvRew import VizDoomEnv
 
 def main():
     # Cargar modelo entrenado (ajusta la ruta si es necesario)
-    model_path = "models/nivel5/best_model.zip"
+    model_path = "models/ppo_vizdoom_curriculum_final.zip"
     try:
         model = PPO.load(model_path)
         print(f"Modelo cargado exitosamente: {model_path}")
@@ -15,8 +15,7 @@ def main():
         return
 
     # Crear el mismo entorno que se usó para entrenar
-    scenario_path = "Scenarios/deadly_corridor/deadly_corridor - t1.cfg"
-    num_actions = 3  # left, right, shoot
+    scenario_path = "Scenarios/deadly_corridor/deadly_corridor - t5.cfg"
     
     try:
         env = VizDoomEnv(

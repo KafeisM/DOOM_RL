@@ -9,7 +9,7 @@ import os
 import gymnasium as gym
 
 # Carpetas
-LOG_DIR = "./logs"
+LOG_DIR = "./logs/experimento2"
 MODEL_DIR = "./models"
 
 os.makedirs(LOG_DIR, exist_ok=True)
@@ -22,12 +22,12 @@ def main():
         {
             "path": "Scenarios/deadly_corridor/deadly_corridor - t1.cfg",
             "name": "nivel1",
-            "steps": 30000
+            "steps": 400000
         },
         {
             "path": "Scenarios/deadly_corridor/deadly_corridor - t2.cfg",
             "name": "nivel2",
-            "steps": 40000
+            "steps": 50000
         },
         {
             "path": "Scenarios/deadly_corridor/deadly_corridor - t3.cfg",
@@ -37,12 +37,12 @@ def main():
         {
             "path": "Scenarios/deadly_corridor/deadly_corridor - t4.cfg",
             "name": "nivel4",
-            "steps": 60000
+            "steps": 50000
         },
         {
             "path": "Scenarios/deadly_corridor/deadly_corridor - t5.cfg",
             "name": "nivel5",
-            "steps": 70000
+            "steps": 150000
         }
     ]
 
@@ -114,12 +114,12 @@ def main():
                     batch_size=64,
                     gae_lambda=0.95,
                     gamma=0.99,
-                    n_epochs=10,
-                    ent_coef=0.01,
                     learning_rate=2.5e-4,
-                    clip_range=0.1,
+                    ent_coef=0.02,
+                    clip_range=0.05,
+                    n_epochs=10,
                     verbose=1,
-                    tensorboard_log=os.path.join(LOG_DIR, f"tensorboard_{level_name}"),
+                    tensorboard_log=os.path.join(LOG_DIR, f"tensorboard_{level_name}")
                 )
             else:
                 model.set_env(env)
