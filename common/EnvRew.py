@@ -32,6 +32,23 @@ class VizDoomEnv(gym.Env):
         gray = cv2.cvtColor(np.moveaxis(img, 0, -1), cv2.COLOR_BGR2GRAY)
         resized = cv2.resize(gray, (160, 100), interpolation=cv2.INTER_AREA)
         return resized[..., np.newaxis]
+        
+    def render(self):
+        if self.game.is_episode_finished():
+            return None
+        
+        # Obtener frame a color para mejor visualización en el video
+        if self.game.get_state() is not None:
+            frame = self.game.get_state().screen_buffer
+            # VizDoom devuelve los canales primero, necesitamos convertir a HWC (alto, ancho, canales)
+            frame = np.moveaxis(frame, 0, -1)
+            # Convertir a formato RGB si es necesario
+            if frame.shape[2] == 3:
+                frame = cv2.cvtColor(frame, cv2.COLOR_RGB2BGR)
+            # Redimensionar si es necesario
+            frame = cv2.resize(frame, (160, 100), interpolation=cv2.INTER_AREA)
+            return frame
+        return None
 
     def close(self):
         self.game.close()
