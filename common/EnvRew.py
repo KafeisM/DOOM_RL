@@ -5,8 +5,12 @@ from gymnasium.spaces import Box, Discrete
 from vizdoom import DoomGame
 
 class VizDoomEnv(gym.Env):
-    def __init__(self, config_path, render=False):
+    """
+    VizDoom Gym Environment with configurable frame-skip.
+    """
+    def __init__(self, config_path, render=False, frame_skip=4):
         super().__init__()
+        self.frame_skip = frame_skip
         self.game = DoomGame()
         self.game.load_config(config_path)
         self.game.set_window_visible(render)
@@ -16,11 +20,13 @@ class VizDoomEnv(gym.Env):
         self.action_space = Discrete(self.game.get_available_buttons_size())
 
     def step(self, action):
-        reward = self.game.make_action([int(i == action) for i in range(self.action_space.n)], 4)
+        reward = self.game.make_action(
+            [int(i == action) for i in range(self.action_space.n)],
+            self.frame_skip
+        )
         done = self.game.is_episode_finished()
-        obs = np.zeros((100, 160, 1), dtype=np.uint8) if done else self._get_obs()
-        info = {}
-        return obs, reward, done, False, info
+        obs = np.zeros(self.observation_space.shape, dtype=np.uint8) if done else self._get_obs()
+        return obs, reward, done, False, {}
 
     def reset(self, seed=None, options=None):
         super().reset(seed=seed)
@@ -32,23 +38,13 @@ class VizDoomEnv(gym.Env):
         gray = cv2.cvtColor(np.moveaxis(img, 0, -1), cv2.COLOR_BGR2GRAY)
         resized = cv2.resize(gray, (160, 100), interpolation=cv2.INTER_AREA)
         return resized[..., np.newaxis]
-        
+
     def render(self):
-        if self.game.is_episode_finished():
+        state = self.game.get_state()
+        if state is None:
             return None
-        
-        # Obtener frame a color para mejor visualización en el video
-        if self.game.get_state() is not None:
-            frame = self.game.get_state().screen_buffer
-            # VizDoom devuelve los canales primero, necesitamos convertir a HWC (alto, ancho, canales)
-            frame = np.moveaxis(frame, 0, -1)
-            # Convertir a formato RGB si es necesario
-            if frame.shape[2] == 3:
-                frame = cv2.cvtColor(frame, cv2.COLOR_RGB2BGR)
-            # Redimensionar si es necesario
-            frame = cv2.resize(frame, (160, 100), interpolation=cv2.INTER_AREA)
-            return frame
-        return None
+        img = np.moveaxis(state.screen_buffer, 0, -1)
+        return cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
 
     def close(self):
         self.game.close()

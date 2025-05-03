@@ -1,78 +1,72 @@
-# shaped_reward_wrapper.py (versión optimizada con DAMAGECOUNT)
 from gymnasium import RewardWrapper
 
 class ShapedRewardWrapper(RewardWrapper):
+    """
+    Reward shaping for VizDoom Deadly Corridor:
+      - +5.0 per kill (Δ KILLCOUNT)
+      - +0.1 per point of damage inflicted (Δ DAMAGECOUNT)
+      - -0.1 per point of damage received (DAMAGE_TAKEN)
+      - -0.1 per missed shot (ammo used without damage or kills)
+      - +0.05 per forward movement (reward base > 0)
+      - -0.1 per timestep of stasis (>5 timesteps without damage or kills)
+    """
     def __init__(self, env):
         super().__init__(env)
-        self.prev_health = None
-        self.prev_damage_count = None
-        self.prev_ammo = None
+        self.prev_kills = 0
+        self.prev_dmg   = 0
+        self.prev_ammo  = 0
         self.step_counter = 0
 
     def reset(self, **kwargs):
-        observation, info = self.env.reset(**kwargs)
+        obs, info = self.env.reset(**kwargs)
         self.step_counter = 0
-
-        try:
-            if self.unwrapped.game.get_state() is not None:
-                game_vars = self.unwrapped.game.get_state().game_variables
-                self.prev_health = game_vars[0]     # HEALTH
-                self.prev_damage_count = game_vars[2]  # DAMAGECOUNT
-                self.prev_ammo = game_vars[3]       # AMMO
-        except Exception:
-            self.prev_health = None
-            self.prev_damage_count = None
-            self.prev_ammo = None
-
-        return observation, info
+        state = self.unwrapped.game.get_state()
+        if state is not None and state.game_variables is not None:
+            # [HEALTH, DAMAGE_TAKEN, DAMAGECOUNT, KILLCOUNT, SELECTED_WEAPON_AMMO]
+            _, _, dmg, kills, ammo = state.game_variables
+            self.prev_kills = kills
+            self.prev_dmg   = dmg
+            self.prev_ammo  = ammo
+        return obs, info
 
     def reward(self, reward):
-        if self.unwrapped.game.get_state() is None:
+        state = self.unwrapped.game.get_state()
+        if state is None or state.game_variables is None:
             return reward
 
-        try:
-            game_vars = self.unwrapped.game.get_state().game_variables
-            if game_vars is None or len(game_vars) < 4:
-                return reward
+        _, dmg_taken, dmg_count, kills, ammo = state.game_variables
+        shaped = reward
 
-            # Variables del juego
-            health = game_vars[0]             # HEALTH
-            damage_taken = game_vars[1]       # DAMAGE_TAKEN
-            damage_count = game_vars[2]       # DAMAGECOUNT
-            ammo = game_vars[3]               # AMMO
+        # 1) Bonus per kill
+        delta_kills = kills - self.prev_kills
+        if delta_kills > 0:
+            shaped += 5.0 * delta_kills
 
-            shaped = reward
+        # 2) Bonus per damage inflicted
+        delta_dmg = dmg_count - self.prev_dmg
+        if delta_dmg > 0:
+            shaped += 0.1 * delta_dmg
 
-            # 1. Penalización por perder salud
-            if self.prev_health is not None:
-                delta_health = health - self.prev_health
-                if delta_health < 0:
-                    shaped -= 0.3 * abs(delta_health)
+        # 3) Penalty per damage received
+        shaped -= 0.1 * dmg_taken
 
-            # 2. Recompensa por daño infligido real
-            if self.prev_damage_count is not None:
-                delta_damage = damage_count - self.prev_damage_count
-                shaped += 0.1 * delta_damage
+        # 4) Penalty per missed shot
+        delta_ammo = self.prev_ammo - ammo
+        if delta_ammo > 0 and delta_dmg == 0 and delta_kills == 0:
+            shaped -= 0.1 * delta_ammo
 
-            # 3. Penalización por disparar sin impactar
-            if self.prev_ammo is not None:
-                delta_ammo = self.prev_ammo - ammo
-                if delta_ammo > 0 and delta_damage == 0:
-                    shaped -= 0.05 * delta_ammo
+        # 5) Small bonus for forward movement
+        if reward > 0:
+            shaped += 0.05
 
-            # 4. Bonus por supervivencia
-            shaped += 0.01
+        # 6) Penalty for stasis (>5 timesteps without damage or kills)
+        self.step_counter += 1
+        if self.step_counter > 5 and delta_dmg == 0 and delta_kills == 0:
+            shaped -= 0.1
 
-            # 5. Penalización por estancamiento prolongado
-            self.step_counter += 1
-            if self.step_counter > 100 and reward <= 0:
-                shaped -= 0.05
+        # update previous values
+        self.prev_kills = kills
+        self.prev_dmg   = dmg_count
+        self.prev_ammo  = ammo
 
-            self.prev_health = health
-            self.prev_damage_count = damage_count
-            self.prev_ammo = ammo
-
-            return shaped
-
-        except Exception:
-            return reward
+        return shaped
