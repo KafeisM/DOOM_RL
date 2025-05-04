@@ -1,26 +1,16 @@
-#import PPO for training
+# import PPO for training
 from stable_baselines3 import PPO
+from common.DoomEnv import BaseVizDoomEnv  # Importar la clase correcta
 from common.callbacks import TrainAndLoggingCallback
 
-from common.DoomEnvRew import BaseVizDoomEnvPrueba  # Importar la clase base
 
-class DefendCenterEnv(BaseVizDoomEnvPrueba):
+class DefendCenterEnv(BaseVizDoomEnv):
     def __init__(self, render=False):
-        # Configuración específica para este escenario
-        game_variables_config = {
-            "variables": ["ammo", "health"],  # Variables que nos interesan
-            "weights": [5.0, 10.0],           # Pesos para el reward shaping
-        }
-        
-        super().__init__(
-            "./ViZDoom/scenarios/defend_the_center.cfg", 
-            3, 
-            render,
-            game_variables_config
-        )
+        super().__init__("./ViZDoom/scenarios/defend_the_center.cfg", 3, render)
+
 
 def main():
-    CHECKPOINT_DIR = 'train/train_defend_center_2'
+    CHECKPOINT_DIR = 'train/train_defend_center'
     LOG_DIR = 'logs/log_defend_center'
 
     callback = TrainAndLoggingCallback(check_freq=20000, save_path=CHECKPOINT_DIR)

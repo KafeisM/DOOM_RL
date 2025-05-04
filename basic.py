@@ -1,39 +1,25 @@
-import cv2
-from stable_baselines3 import ppo
+#import PPO for training
+from stable_baselines3 import PPO
+from common.DoomEnv import BaseVizDoomEnv  # Importar la clase específica
 from common.callbacks import TrainAndLoggingCallback
-from common import envs
-from stable_baselines3.common import policies
+
+
+class BasicEnv(BaseVizDoomEnv):
+    def __init__(self, render=False):
+        super().__init__("./ViZDoom/scenarios/basic.cfg", 3, render)
+
 
 
 def main():
     CHECKPOINT_DIR = 'train/train_basic'
     LOG_DIR = 'logs/log_basic'
 
-    env_args = {
-        'scenario': 'basic',
-        'frame_skip': 4,
-        'frame_processor': envs.default_frame_processor
-    }
+    callback = TrainAndLoggingCallback(check_freq=20000, save_path=CHECKPOINT_DIR)
 
+    env = BasicEnv()
+    model = PPO('CnnPolicy', env, tensorboard_log=LOG_DIR, verbose=1, learning_rate=0.0001, n_steps=2048)
+    model.learn(total_timesteps=100000, callback=callback)
 
-    env = envs.create_vec_env(**env_args)
-    eval_env = envs.create_vec_env(**env_args)
-    model =  ppo.PPO(policy=policies.ActorCriticCnnPolicy,
-                    env=env,
-                    learning_rate=1e-4,
-                    tensorboard_log='logs/tensorboard')
-
-    callback = TrainAndLoggingCallback(check_freq=10000,
-                                       save_path=CHECKPOINT_DIR,
-                                       eval_env=eval_env,  # Entorno para evaluación
-                                       n_eval_episodes=10,  # Número de episodios para evaluar
-                                       eval_freq=2500,  # Frecuencia de evaluación
-                                       save_best=True  # Guardar el mejor modelo
-                                       )
-
-    model.learn(total_timesteps=25000, callback=callback)
-    env.close()
-    eval_env.close()
 
 if __name__ == "__main__":
     main()

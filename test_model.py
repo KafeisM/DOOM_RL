@@ -8,7 +8,7 @@ from common.EnvRew import VizDoomEnv
 
 def main():
     # 1) Carga del modelo
-    model_path = "models/ppo_vizdoom_nivel2_final.zip"
+    model_path = "models/exp5/ppo_vizdoom_curriculum_exp003.zip"
     try:
         model = PPO.load(model_path)
         print(f"Modelo cargado exitosamente: {model_path}")
@@ -17,7 +17,7 @@ def main():
         return
 
     # 2) Configurar entornos (igual que en entrenamiento)
-    scenario_path = "Scenarios/deadly_corridor/deadly_corridor - t2.cfg"
+    scenario_path = "Scenarios/deadly_corridor/deadly_corridor - t5.cfg"
 
     # Entorno para visualización directa
     viz_env = VizDoomEnv(scenario_path, render=True, frame_skip=4)

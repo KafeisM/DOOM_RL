@@ -9,8 +9,8 @@ import os
 import gymnasium as gym
 
 # Carpetas
-LOG_DIR = "./logs/experimento3"
-MODEL_DIR = "./models"
+LOG_DIR = "./logs/experimento5"
+MODEL_DIR = "./models/exp5"
 
 os.makedirs(LOG_DIR, exist_ok=True)
 os.makedirs(MODEL_DIR, exist_ok=True)
@@ -19,11 +19,11 @@ os.makedirs(MODEL_DIR, exist_ok=True)
 def main():
     # Definición de niveles con nuevo curriculum
     levels = [
-        {"path": "Scenarios/deadly_corridor/deadly_corridor - t1.cfg", "name": "nivel1", "steps": 50000},
-        {"path": "Scenarios/deadly_corridor/deadly_corridor - t2.cfg", "name": "nivel2", "steps": 100000},
-        {"path": "Scenarios/deadly_corridor/deadly_corridor - t3.cfg", "name": "nivel3", "steps": 200000},
-        {"path": "Scenarios/deadly_corridor/deadly_corridor - t4.cfg", "name": "nivel4", "steps": 200000},
-        {"path": "Scenarios/deadly_corridor/deadly_corridor - t5.cfg", "name": "nivel5", "steps": 300000},
+        {"path": "Scenarios/deadly_corridor/deadly_corridor - t1.cfg", "name": "nivel1", "steps": 400000},
+        {"path": "Scenarios/deadly_corridor/deadly_corridor - t2.cfg", "name": "nivel2", "steps": 50000},
+        {"path": "Scenarios/deadly_corridor/deadly_corridor - t3.cfg", "name": "nivel3", "steps": 50000},
+        {"path": "Scenarios/deadly_corridor/deadly_corridor - t4.cfg", "name": "nivel4", "steps": 50000},
+        {"path": "Scenarios/deadly_corridor/deadly_corridor - t5.cfg", "name": "nivel5", "steps": 50000},
     ]
 
     model = None
@@ -40,7 +40,7 @@ def main():
             env = ShapedRewardWrapper(env)
             return Monitor(env, os.path.join(LOG_DIR, f"monitor_{level_name}.csv"))
 
-        env = DummyVecEnv([make_env for _ in range(4)])
+        env = DummyVecEnv([make_env for _ in range(8)])
         env = VecTransposeImage(env)
         env = VecFrameStack(env, n_stack=4)
 
@@ -70,21 +70,7 @@ def main():
         # Inicialización o actualización del modelo
         try:
             if model is None:
-                model = PPO(
-                    "CnnPolicy",
-                    env,
-                    n_steps=2048,
-                    batch_size=64,
-                    gae_lambda=0.95,
-                    gamma=0.99,
-                    learning_rate=5e-5,
-                    ent_coef=0.05,
-                    clip_range=0.05,
-                    n_epochs=5,
-                    verbose=1,
-                    tensorboard_log=LOG_DIR,
-                    max_grad_norm=0.5,
-                )
+                model = PPO('CnnPolicy', env, tensorboard_log=LOG_DIR, verbose=1, learning_rate=0.00001, n_steps=2048, clip_range=.1, gamma=.95, gae_lambda=.9)
             else:
                 model.set_env(env)
 

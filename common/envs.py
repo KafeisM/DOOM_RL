@@ -61,3 +61,4 @@ def create_env(scenario: str, **kwargs) -> DoomEnv:
     game.load_config(f"scenarios/{scenario}.cfg")
     game.init()
     return DoomEnv(game, **kwargs)
+

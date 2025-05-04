@@ -2,71 +2,53 @@ from gymnasium import RewardWrapper
 
 class ShapedRewardWrapper(RewardWrapper):
     """
-    Reward shaping for VizDoom Deadly Corridor:
-      - +5.0 per kill (Δ KILLCOUNT)
-      - +0.1 per point of damage inflicted (Δ DAMAGECOUNT)
-      - -0.1 per point of damage received (DAMAGE_TAKEN)
-      - -0.1 per missed shot (ammo used without damage or kills)
-      - +0.05 per forward movement (reward base > 0)
-      - -0.1 per timestep of stasis (>5 timesteps without damage or kills)
+    Reward shaping inspirado en el notebook de Github:
+      - movement_reward: recompensa base por +Δx (distance-to-vest)
+      - +10 × (damage_taken_delta): penaliza cada punto de salud perdido
+      - +200 × (hitcount_delta): recompensa muy fuerte por cada hit/killcount
+      - +5 × (ammo_delta): penaliza el uso de munición sin hits
     """
     def __init__(self, env):
         super().__init__(env)
-        self.prev_kills = 0
-        self.prev_dmg   = 0
-        self.prev_ammo  = 0
-        self.step_counter = 0
+        self.prev_damage_taken = 0
+        self.prev_hitcount = 0
+        self.prev_ammo = 0
 
     def reset(self, **kwargs):
         obs, info = self.env.reset(**kwargs)
-        self.step_counter = 0
         state = self.unwrapped.game.get_state()
         if state is not None and state.game_variables is not None:
-            # [HEALTH, DAMAGE_TAKEN, DAMAGECOUNT, KILLCOUNT, SELECTED_WEAPON_AMMO]
-            _, _, dmg, kills, ammo = state.game_variables
-            self.prev_kills = kills
-            self.prev_dmg   = dmg
-            self.prev_ammo  = ammo
+            # [HEALTH, DAMAGE_TAKEN, HITCOUNT, SELECTED_WEAPON_AMMO]
+            _, dmg_taken, hitcount, ammo = state.game_variables
+            self.prev_damage_taken = dmg_taken
+            self.prev_hitcount      = hitcount
+            self.prev_ammo          = ammo
         return obs, info
 
     def reward(self, reward):
+        """
+        reward: movement_reward (+Δx or −Δx from base Doom)
+        """
         state = self.unwrapped.game.get_state()
         if state is None or state.game_variables is None:
             return reward
 
-        _, dmg_taken, dmg_count, kills, ammo = state.game_variables
+        _, dmg_taken, hitcount, ammo = state.game_variables
+
+        # deltas
+        damage_taken_delta = -dmg_taken + self.prev_damage_taken
+        hitcount_delta     = hitcount - self.prev_hitcount
+        ammo_delta         = ammo - self.prev_ammo
+
+        # shaped reward
         shaped = reward
+        shaped += 10.0 * damage_taken_delta    # −10 por cada punto de daño
+        shaped += 200.0 * hitcount_delta       # +200 por cada hit/killcount
+        shaped += 5.0 * ammo_delta             # −5 por cada bala disparada sin hit
 
-        # 1) Bonus per kill
-        delta_kills = kills - self.prev_kills
-        if delta_kills > 0:
-            shaped += 5.0 * delta_kills
-
-        # 2) Bonus per damage inflicted
-        delta_dmg = dmg_count - self.prev_dmg
-        if delta_dmg > 0:
-            shaped += 0.1 * delta_dmg
-
-        # 3) Penalty per damage received
-        shaped -= 0.1 * dmg_taken
-
-        # 4) Penalty per missed shot
-        delta_ammo = self.prev_ammo - ammo
-        if delta_ammo > 0 and delta_dmg == 0 and delta_kills == 0:
-            shaped -= 0.1 * delta_ammo
-
-        # 5) Small bonus for forward movement
-        if reward > 0:
-            shaped += 0.05
-
-        # 6) Penalty for stasis (>5 timesteps without damage or kills)
-        self.step_counter += 1
-        if self.step_counter > 5 and delta_dmg == 0 and delta_kills == 0:
-            shaped -= 0.1
-
-        # update previous values
-        self.prev_kills = kills
-        self.prev_dmg   = dmg_count
-        self.prev_ammo  = ammo
+        # actualizar previos
+        self.prev_damage_taken = dmg_taken
+        self.prev_hitcount      = hitcount
+        self.prev_ammo          = ammo
 
         return shaped
