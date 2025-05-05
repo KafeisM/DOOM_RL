@@ -2,77 +2,79 @@ import time
 import cv2
 import numpy as np
 from stable_baselines3 import PPO
-from stable_baselines3.common.vec_env import DummyVecEnv, VecTransposeImage, VecFrameStack
-from common.EnvRew import VizDoomEnv
+from common.DoomEnv import BaseVizDoomEnv
+from stable_baselines3.common.evaluation import evaluate_policy
 
 
 def main():
-    # 1) Carga del modelo
-    model_path = "models/exp5/ppo_vizdoom_curriculum_exp003.zip"
+    # Rutas del modelo y escenario
+    MODEL_PATH = "PPO/train - models/train_defend_center/best_model_100000.zip"
+    SCENARIO_PATH = "ViZDoom/scenarios/defend_the_center.cfg"
+
+    # Cargar modelo
     try:
-        model = PPO.load(model_path)
-        print(f"Modelo cargado exitosamente: {model_path}")
+        model = PPO.load(MODEL_PATH)
+        print(f"✓ Modelo cargado: {MODEL_PATH}")
     except Exception as e:
-        print(f"Error al cargar el modelo: {e}")
+        print(f"✗ Error cargando modelo: {e}")
         return
 
-    # 2) Configurar entornos (igual que en entrenamiento)
-    scenario_path = "Scenarios/deadly_corridor/deadly_corridor - t5.cfg"
-
-    # Entorno para visualización directa
-    viz_env = VizDoomEnv(scenario_path, render=True, frame_skip=4)
-
-    # Entorno vectorizado con wrappers para predicción
-    def make_env():
-        return VizDoomEnv(scenario_path, render=False, frame_skip=4)
-
-    env = DummyVecEnv([make_env])
-    env = VecTransposeImage(env)
-    env = VecFrameStack(env, n_stack=4)
-
+    # Crear entorno con renderizado
+    env = BaseVizDoomEnv(SCENARIO_PATH, num_actions=3, render=True)
     print(f"Observation space: {env.observation_space}")
     print(f"Action space: {env.action_space}")
 
-    # 3) Prueba del modelo
+    # Opcional: Evaluar rendimiento medio
+    print("Evaluando rendimiento medio...")
+    # Adaptamos evaluate_policy para la nueva interfaz de Gymnasium
+    mean_reward, _ = evaluate_policy(model, env, n_eval_episodes=5)
+    print(f"Recompensa media: {mean_reward}")
+
+    # Visualizar episodios
+    print("\nVisualizando comportamiento del agente...")
     for episode in range(5):
-        obs = env.reset()
-        viz_env.reset()
+        obs, info = env.reset()
         done = False
+        truncated = False
         total_reward = 0
         steps = 0
 
-        print(f"\n--- Episodio {episode + 1} ---")
+        print(f"\n--- Episodio {episode + 1}/5 ---")
 
-        while not done:
-            # Predecir acción usando el modelo entrenado
+        while not done and not truncated:
+            # Predecir acción
             action, _ = model.predict(obs, deterministic=True)
 
-            # Ejecutar acción en ambos entornos
-            obs, reward, done, info = env.step(action)
-            viz_env.step(action[0])
+            # Ejecutar acción
+            obs, reward, done, truncated, info = env.step(action)
 
-            # Visualización
-            img = viz_env.render()
-            if img is not None:
-                cv2.imshow("Doom RL", img)
-                cv2.waitKey(1)
+            # Creamos un frame para mostrar (ya que render() devuelve None)
+            # Mostramos directamente la observación
+            frame = obs.squeeze()  # Eliminamos dimensión de canal si es necesario
+            if frame.shape == (100, 160):  # si es grayscale
+                # Convertir a RGB para visualización
+                frame = cv2.cvtColor(frame, cv2.COLOR_GRAY2BGR)
 
-            # Actualizar estado
-            total_reward += reward[0]
+            if frame is not None:
+                # Redimensionar para mejor visualización
+                frame = cv2.resize(frame, (640, 400))
+                cv2.imshow("Doom RL Agent", frame)
+                if cv2.waitKey(1) & 0xFF == ord('q'):
+                    print("Visualización interrumpida por el usuario")
+                    break
+
+            # Actualizar estadísticas
+            total_reward += reward
             steps += 1
 
             # Pequeña pausa para mejor visualización
             time.sleep(0.05)
 
-            # Terminar si el episodio acaba
-            if done[0]:
-                break
-
-        print(f"Episodio {episode + 1}: pasos={steps}, reward={total_reward:.1f}")
+        print(f"Episodio {episode + 1}: pasos={steps}, recompensa={total_reward:.1f}")
+        time.sleep(1)  # Pausa entre episodios
 
     # Cerrar recursos
     env.close()
-    viz_env.close()
     cv2.destroyAllWindows()
 
 

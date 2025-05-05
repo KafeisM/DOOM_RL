@@ -8,9 +8,9 @@ from stable_baselines3.common.callbacks import CheckpointCallback
 from common.DeadlyCorridorEnv import VizDoomReward
 from common.callbacks import TrainAndLoggingCallback
 
-CFG_PATH = "./Scenarios/deadly_corridor/deadly_corridor.cfg"
-SAVE_PATH = "./PPO/train - models/train_deadly_corridor"
-LOG_PATH = "./PPO/logs/train_deadly_corridor"
+CFG_PATH = "../Scenarios/deadly_corridor/deadly_corridor.cfg"
+SAVE_PATH = "./train - models/train_deadly_corridor"
+LOG_PATH = "../logs/PPO/log_deadly_corridor"
 TIMESTEPS = 1_000_000
 
 def setup_env(config_path):
@@ -27,20 +27,14 @@ def train_ppo():
     
     # 2) Define un callback para salvar checkpoints cada X pasos
     callbacks  = TrainAndLoggingCallback(
-        check_freq=50_000,
-        save_path="./models",
+        check_freq=100_000,
+        save_path=SAVE_PATH,
         eval_freq=50_000,
         eval_env=eval_env
     )
     
     # 3) Instancia el modelo PPO con red convolucional 
-    model = PPO(
-        "CnnPolicy", 
-        env,
-        learning_rate=0.0001,
-        n_steps=2048,
-        tensorboard_log=LOG_PATH
-    )
+    model = PPO('CnnPolicy', env, tensorboard_log=LOG_PATH, verbose=1, learning_rate=0.0001, n_steps=2048)
 
     model.set_logger(configure(LOG_PATH, ["stdout", "tensorboard", "csv"]))
 
