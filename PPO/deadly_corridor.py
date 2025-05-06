@@ -14,7 +14,7 @@ LOG_PATH = "../logs/PPO/log_deadly_corridor"
 TIMESTEPS = 1_000_000
 
 def setup_env(config_path):
-    env = VizDoomReward(config_path, visible=False)
+    env = VizDoomReward(config_path, render=False) 
     env = Monitor(env)
     return env
 

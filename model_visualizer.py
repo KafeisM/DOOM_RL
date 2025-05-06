@@ -8,7 +8,7 @@ from stable_baselines3.common.evaluation import evaluate_policy
 
 def main():
     # Rutas del modelo y escenario
-    MODEL_PATH = "PPO/trained_models/train_deadly_corridor/ppo_final.zip"
+    MODEL_PATH = "PPO/train - models/train_deadly_corridor/best_model/best_model.zip"
     SCENARIO_PATH = "Scenarios/deadly_corridor/deadly_corridor.cfg"
 
     # Cargar modelo
@@ -20,14 +20,14 @@ def main():
         return
 
     # Crear entorno con renderizado
-    env = VizDoomReward(scenario_path=SCENARIO_PATH, visible=True)
+    env = VizDoomReward(scenario_path=SCENARIO_PATH, render=True)
     print(f"Observation space: {env.observation_space}")
     print(f"Action space: {env.action_space}")
 
     # Opcional: Evaluar rendimiento medio
     print("Evaluando rendimiento medio...")
-    mean_reward, _ = evaluate_policy(model, env, n_eval_episodes=3)
-    print(f"Recompensa media: {mean_reward}")
+    #mean_reward, _ = evaluate_policy(model, env, n_eval_episodes=3)
+    #print(f"Recompensa media: {mean_reward}")
 
     # Visualizar episodios
     print("\nVisualizando comportamiento del agente...")
@@ -59,9 +59,9 @@ def main():
                 # Redimensionar para mejor visualización
                 frame = cv2.resize(frame, (640, 480))
                 # Aplicar colormap para mejor visualización
-                frame_color = cv2.applyColorMap(frame, cv2.COLOR_BGR2RGB)
+                #frame_color = cv2.applyColorMap(frame, cv2.COLOR_BGR2RGB)
 
-                cv2.imshow("Doom Deadly Corridor Agent", frame_color)
+                cv2.imshow("Doom Deadly Corridor Agent", frame)
                 if cv2.waitKey(1) & 0xFF == ord('q'):
                     print("Visualización interrumpida por el usuario")
                     break

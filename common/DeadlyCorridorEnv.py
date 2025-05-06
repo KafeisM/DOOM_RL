@@ -7,22 +7,34 @@ import os.path
 
 
 class VizDoomReward(Env):
-    def __init__(self, scenario_path, visible=True):
+    def __init__(self, scenario_path, render=False):
         super().__init__()
         self.game = DoomGame() #type: ignore
         self.game.load_config(scenario_path)
-        self.game.set_window_visible(visible)
-        self.game.set_screen_format(ScreenFormat.GRAY8) #type: ignore
-        self.game.set_screen_resolution(ScreenResolution.RES_160X120) #type: ignore
-        self.game.set_available_game_variables([GameVariable.SELECTED_WEAPON_AMMO, GameVariable.HEALTH, GameVariable.KILLCOUNT])  # type: ignore
-        self.game.set_doom_skill(5)
+
+        # Render the game
+        if render:
+            self.game.set_window_visible(True)
+        else:
+            self.game.set_window_visible(False)
+        
+        #self.game.set_screen_format(ScreenFormat.GRAY8) #type: ignore
+        #self.game.set_screen_resolution(ScreenResolution.RES_160X120) #type: ignore
+        #self.game.set_available_game_variables([GameVariable.SELECTED_WEAPON_AMMO, GameVariable.HEALTH, GameVariable.KILLCOUNT])  # type: ignore
+        #self.game.set_doom_skill(5)
+
         self.game.init()
+
         self.ammo = self.game.get_state().game_variables[0]
         self.killcount = 0
         self.health = 100
         
         self.observation_space = Box(low=0, high=255, shape=(120, 160, 1), dtype=np.uint8)  # Cambiado a formato HWC
         self.action_space = Discrete(self.game.get_available_buttons_size())
+
+        print(f"Variables de juego disponibles: {self.game.get_available_game_variables()}")
+        print(f"Acciones disponibles: {self.game.get_available_buttons()}")
+        print(f"Formato de pantalla: {self.game.get_screen_format()}")
 
     def step(self, action):
         buttons = self.game.get_available_buttons_size()
