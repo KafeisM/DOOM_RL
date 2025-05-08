@@ -6,13 +6,13 @@ from common.callbacks import TrainAndLoggingCallback
 
 class BasicEnv(BaseVizDoomEnv):
     def __init__(self, render=False):
-        super().__init__("./ViZDoom/scenarios/basic.cfg", 3, render)
+        super().__init__("../ViZDoom/scenarios/basic.cfg", 3, render)
 
 
 
 def main():
-    CHECKPOINT_DIR = 'train/train_basic'
-    LOG_DIR = 'logs/log_basic'
+    CHECKPOINT_DIR = 'train - models/train_basic'
+    LOG_DIR = '../logs/PPO/log_basic'
 
     callback = TrainAndLoggingCallback(check_freq=20000, save_path=CHECKPOINT_DIR)
 
