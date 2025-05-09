@@ -1,22 +1,21 @@
-import vizdoom as vzd
+from vizdoom import *
 import gymnasium as gym
-from gymnasium.spaces import Discrete, Box
-import cv2
+from gymnasium import Env
+from gymnasium.spaces import Discrete, Box, Dict
 import numpy as np
+import os.path
 
 class BaseVizDoomEnv(gym.Env):
-    """Clase base para entornos VizDoom"""
+    """Clase base para entornos VizDoom simples"""
     
-    def __init__(self, scenario_path,num_actions ,render=False):
+    def __init__(self, scenario_path, num_actions, render=False):
         super().__init__()
 
         print("Loading scenario:", scenario_path)
 
         # Set up game
-        self.game = vzd.DoomGame()
+        self.game = DoomGame()  # type: ignore
         self.game.load_config(scenario_path)
-
-        self.num_actions = num_actions
 
         # Render the game
         if render:
@@ -24,12 +23,22 @@ class BaseVizDoomEnv(gym.Env):
         else:
             self.game.set_window_visible(False)
 
-        # Set the Game scenario
+        self.game.set_screen_format(ScreenFormat.GRAY8)  # type: ignore
+        self.game.set_screen_resolution(ScreenResolution.RES_160X120)  # type: ignore
+        
+        # Inicializamos el juego
         self.game.init()
+        
+        # Guardamos la cantidad de acciones
+        self.num_actions = num_actions if num_actions > 0 else self.game.get_available_buttons_size()
 
         # Create the action space and observation space
-        self.observation_space = Box(low=0, high=255, shape=(100,160,1), dtype=np.uint8)
-        self.action_space = Discrete(num_actions)  # 3 actions: turn left, turn right, shoot
+        self.observation_space = Box(low=0, high=255, shape=(120, 160, 1), dtype=np.uint8)
+        self.action_space = Discrete(self.num_actions)
+
+        print(f"Variables de juego disponibles: {self.game.get_available_game_variables()}")
+        print(f"Acciones disponibles: {self.game.get_available_buttons()}")
+        print(f"Formato de pantalla: {self.game.get_screen_format()}")
 
     def step(self, action):
         actions = np.identity(self.num_actions, dtype=int)
@@ -37,7 +46,7 @@ class BaseVizDoomEnv(gym.Env):
 
         if self.game.get_state():
             state = self.game.get_state().screen_buffer
-            state = self.grayscale(state)
+            state = np.expand_dims(state, axis=-1)  # Añadimos dimensión de canal
             ammo = self.game.get_state().game_variables[0]
             info = ammo
         else:
@@ -45,26 +54,22 @@ class BaseVizDoomEnv(gym.Env):
             info = 0
 
         info = {"info": info}
-        done = self.game.is_episode_finished()
+        terminated = self.game.is_episode_finished()
         truncated = False
 
-        return state, reward, done, truncated, info
+        return state, reward, terminated, truncated, info
 
-    def render(self):
-        pass
-
-    def reset(self, seed=None):
+    def reset(self, seed=None, options=None):
         self.game.new_episode()
         state = self.game.get_state().screen_buffer
+        state = np.expand_dims(state, axis=-1)  # Añadimos dimensión de canal
         ammo = self.game.get_state().game_variables[0]
         info = {"ammo": ammo}
-        return self.grayscale(state), info
+        return state, info
 
-    def grayscale(self, observation):
-        gray = cv2.cvtColor(np.moveaxis(observation, 0, -1), cv2.COLOR_BGR2GRAY)
-        resize = cv2.resize(gray, (160,100), interpolation=cv2.INTER_CUBIC)
-        state = np.reshape(resize, (100,160,1))
-        return state
+    def render(self):
+        # Ya está implementado con la ventana visible
+        pass
 
     def close(self):
         self.game.close()

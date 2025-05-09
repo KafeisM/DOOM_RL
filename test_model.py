@@ -8,8 +8,8 @@ from stable_baselines3.common.evaluation import evaluate_policy
 
 def main():
     # Rutas del modelo y escenario
-    MODEL_PATH = "PPO/train - models/train_defend_center/best_model_100000.zip"
-    SCENARIO_PATH = "ViZDoom/scenarios/defend_the_center.cfg"
+    MODEL_PATH = "PPO/train - models/train_basic/prova2/model_100000_steps.zip"
+    SCENARIO_PATH = "ViZDoom/scenarios/basic.cfg"
 
     # Cargar modelo
     try:

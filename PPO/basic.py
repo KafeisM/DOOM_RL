@@ -1,3 +1,9 @@
+import sys
+import os
+
+# Añadir el directorio raíz al PYTHONPATH
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
 #import PPO for training
 from stable_baselines3 import PPO
 from common.DoomEnv import BaseVizDoomEnv  # Importar la clase específica
@@ -11,7 +17,7 @@ class BasicEnv(BaseVizDoomEnv):
 
 
 def main():
-    CHECKPOINT_DIR = 'train - models/train_basic'
+    CHECKPOINT_DIR = 'train - models/train_basic/prova2'
     LOG_DIR = '../logs/PPO/log_basic'
 
     callback = TrainAndLoggingCallback(check_freq=20000, save_path=CHECKPOINT_DIR)
