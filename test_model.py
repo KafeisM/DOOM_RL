@@ -1,19 +1,19 @@
 import time
 import cv2
 import numpy as np
-from stable_baselines3 import PPO
+from stable_baselines3 import PPO,DQN
 from common.DoomEnv import BaseVizDoomEnv
 from stable_baselines3.common.evaluation import evaluate_policy
 
 
 def main():
     # Rutas del modelo y escenario
-    MODEL_PATH = "PPO/train - models/train_basic/prova2/model_100000_steps.zip"
-    SCENARIO_PATH = "ViZDoom/scenarios/basic.cfg"
+    MODEL_PATH = "DQN/train-models/train_defend_center/dqn_basic_final.zip"
+    SCENARIO_PATH = "ViZDoom/scenarios/defend_the_center.cfg"
 
     # Cargar modelo
     try:
-        model = PPO.load(MODEL_PATH)
+        model = DQN.load(MODEL_PATH)
         print(f"✓ Modelo cargado: {MODEL_PATH}")
     except Exception as e:
         print(f"✗ Error cargando modelo: {e}")
