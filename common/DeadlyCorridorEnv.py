@@ -39,7 +39,6 @@ class VizDoomReward(Env):
     def step(self, action):
         buttons = self.game.get_available_buttons_size()
         actions = np.identity(buttons)
-        # second argument is the number of skipped tics, could be interesting to tweak.
         movement_reward = (self.game.make_action(actions[action], 4)) / 5
         reward = 0 
         
