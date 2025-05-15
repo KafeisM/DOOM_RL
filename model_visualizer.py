@@ -3,15 +3,16 @@ import cv2
 import numpy as np
 from stable_baselines3 import PPO
 from common.DeadlyCorridorEnv import VizDoomReward
-from stable_baselines3 import DQN, A2C, PPO
+from common.HealthGatheringEnv import HealthGatheringEnv
+from stable_baselines3 import DQN, PPO
 from stable_baselines3.common.monitor import Monitor
 from stable_baselines3.common.evaluation import evaluate_policy
 
 
 def main():
     # Rutas del modelo y escenario
-    MODEL_PATH = "PPO/train - models/train_deadly_corridor/best_model/best_model.zip"
-    SCENARIO_PATH = "Scenarios/deadly_corridor/deadly_corridor.cfg"
+    MODEL_PATH = "PPO/train - models/train_health/model_200000_steps.zip"
+    SCENARIO_PATH = "Scenarios/health_gathering/health_gathering.cfg"
 
     # Cargar modelo
     try:
@@ -22,7 +23,7 @@ def main():
         return
 
     # Crear entorno con renderizado
-    env = VizDoomReward(scenario_path=SCENARIO_PATH, render=False)
+    env = HealthGatheringEnv(scenario_path=SCENARIO_PATH, render=False)
     print(f"Observation space: {env.observation_space}")
     print(f"Action space: {env.action_space}")
 
