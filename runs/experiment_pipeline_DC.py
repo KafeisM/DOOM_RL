@@ -84,8 +84,8 @@ def run_experiments(algorithm: str, n_seeds: int, total_timesteps: int,
                 tensorboard_log=log_dir,
                 seed=seed,
                 verbose=0,
-                buffer_size=100000,
-                learning_starts=50000,
+                buffer_size=10000,
+                learning_starts=5000,
                 batch_size=32,
                 device=device
             )
