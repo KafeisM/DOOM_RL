@@ -28,10 +28,12 @@ def main():
     model = DQN(
         "CnnPolicy",
         env,
-        buffer_size=10000,  # Tamaño del buffer de experiencia
-        learning_starts=5000,  # Pasos iniciales de exploración
-        batch_size=32,  # Tamaño del batch para entrenamiento
-        target_update_interval=500,  # Actualizar red objetivo cada 1000 pasos
+        buffer_size=50000,  # aumentar el buffer para recordar más experiencias
+        learning_starts=10000,  # esperar más pasos de e-exploración antes de entrenar
+        batch_size=64,  # batch un poco más grande
+        target_update_interval=1000,  # actualizar la red objetivo cada 1000 pasos
+        learning_rate=5e-5,  # bajar un poco el lr para estabilizar
+        exploration_fraction=0.2,  # que ε decaiga más despacio
         tensorboard_log=LOG_DIR,
         verbose=1
     )

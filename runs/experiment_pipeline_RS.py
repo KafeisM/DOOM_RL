@@ -9,11 +9,11 @@ Script para:
 
 Uso:
   - Para ejecutar los entrenamientos:
-      python experiment_pipeline_DC.py --run --algorithm PPO
-      python experiment_pipeline_DC.py --run --algorithm DQN
+      python experiment_pipeline_RS.py --run --algorithm PPO
+      python experiment_pipeline_RS.py --run --algorithm DQN
 
   - Para analizar y generar gráficas:
-      python experiment_pipeline_DC.py --analyze
+      python experiment_pipeline_RS.py --analyze
 """
 import sys
 import os
@@ -30,7 +30,7 @@ from scipy.stats import mannwhitneyu
 from stable_baselines3 import PPO, DQN
 from stable_baselines3.common.monitor import Monitor
 from stable_baselines3.common.utils import set_random_seed
-from common.DoomEnv import BaseVizDoomEnv
+from common.DeadlyCorridorEnv import VizDoomReward
 
 
 def set_global_seed(env, seed: int):
@@ -63,7 +63,7 @@ def run_experiments(algorithm: str, n_seeds: int, total_timesteps: int,
         os.makedirs(log_dir, exist_ok=True)
 
         # Construir entorno con semilla antes de init
-        env = BaseVizDoomEnv(scenario_cfg, num_actions, render, seed)
+        env = VizDoomReward(scenario_cfg, render=False, seed=seed)
         env = Monitor(env, filename=monitor_path)
 
         # Instanciar modelo en dispositivo
@@ -74,7 +74,7 @@ def run_experiments(algorithm: str, n_seeds: int, total_timesteps: int,
                 seed=seed,
                 verbose=0,
                 learning_rate=0.0001,
-                n_steps=4096,
+                n_steps=2048,
                 device=device
             )
         elif algorithm == "DQN":
@@ -83,8 +83,8 @@ def run_experiments(algorithm: str, n_seeds: int, total_timesteps: int,
                 tensorboard_log=log_dir,
                 seed=seed,
                 verbose=0,
-                buffer_size=10000,
-                learning_starts=5000,
+                buffer_size=100000,
+                learning_starts=50000,
                 batch_size=32,
                 device=device
             )
@@ -257,11 +257,11 @@ def main():
     parser.add_argument('--analyze', action='store_true', help="Analizar resultados")
     parser.add_argument('--algorithm', type=str, choices=['PPO', 'DQN'], help="Algoritmo para --run")
     parser.add_argument('--n_seeds', type=int, default=50, help="Número de runs independientes")
-    parser.add_argument('--timesteps', type=int, default=100000, help="Timesteps por run")
+    parser.add_argument('--timesteps', type=int, default=500000, help="Timesteps por run")
     parser.add_argument('--scenario_cfg', type=str,
-                        default="../ViZDoom/scenarios/defend_the_center.cfg",
+                        default="../Scenarios/deadly_corridor/deadly_corridor.cfg",
                         help="Ruta al escenario VizDoom")
-    parser.add_argument('--num_actions', type=int, default=3, help="Número de acciones discretas")
+    parser.add_argument('--num_actions', type=int, default=7, help="Número de acciones discretas")
     parser.add_argument('--render', action='store_true', help="Renderizar entorno")
     parser.add_argument('--bin_size', type=int, default=5000, help="Tamaño de bin para análisis")
     parser.add_argument('--output_prefix', type=str, default="results", help="Prefijo para archivos de salida (.png)")

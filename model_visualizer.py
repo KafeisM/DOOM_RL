@@ -11,8 +11,8 @@ from stable_baselines3.common.evaluation import evaluate_policy
 
 def main():
     # Rutas del modelo y escenario
-    MODEL_PATH = "PPO/train - models/train_health/model_200000_steps.zip"
-    SCENARIO_PATH = "Scenarios/health_gathering/health_gathering.cfg"
+    MODEL_PATH = "PPO/train - models/train_deadly_corridor/ppo_final.zip"
+    SCENARIO_PATH = "Scenarios/deadly_corridor/deadly_corridor.cfg"
 
     # Cargar modelo
     try:
@@ -23,7 +23,7 @@ def main():
         return
 
     # Crear entorno con renderizado
-    env = HealthGatheringEnv(scenario_path=SCENARIO_PATH, render=False)
+    env = VizDoomReward(scenario_path=SCENARIO_PATH, render=False)
     print(f"Observation space: {env.observation_space}")
     print(f"Action space: {env.action_space}")
 

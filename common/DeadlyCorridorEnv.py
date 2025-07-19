@@ -7,9 +7,16 @@ import os.path
 
 
 class VizDoomReward(Env):
-    def __init__(self, scenario_path, render=False):
+    def __init__(self, scenario_path, render=False, seed=None):
         super().__init__()
         self.game = DoomGame() #type: ignore
+
+        # Aplica semilla antes de cargar la configuración y de init
+        if seed is not None:
+            print(f"[DEBUG] Applying seed before load_config/init: {seed}")
+            self.game.set_seed(seed)
+            print(f"[SEED] DoomGame seed set to {seed} (pre-load)")
+
         self.game.load_config(scenario_path)
 
         # Render the game
