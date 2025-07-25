@@ -12,7 +12,7 @@ El objetivo principal es analizar, comparar y entrenar agentes inteligentes que 
 - **[Stable-Baselines3](https://github.com/DLR-RM/stable-baselines3)** – Implementaciones de algoritmos SOTA en RL.
 - **Python** – Lenguaje principal del proyecto.
 - **Gymnasium** – Interfaz de entornos de RL (adaptación personalizada para VizDoom).
-- **WandB / TensorBoard** _(opcional)_ – Para seguimiento de métricas y visualización de entrenamientos.
+- **TensorBoard** – Para seguimiento de métricas y visualización de entrenamientos.
 
 ---
 
