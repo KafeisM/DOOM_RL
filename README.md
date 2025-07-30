@@ -40,7 +40,7 @@ El **pipeline** en `runs/experiment_pipeline_DC.py` automatiza entrenamiento, ch
 git clone https://github.com/KafeisM/DOOM_RL.git
 pip install -r requirements.txt  # Incluye gymnasium vizdoom stable-baselines3 pytorch...
 ```
-Sigue las instrucciones oficiales de [VizDoom](https://github.com/mwydmuch/ViZDoom) para compilar el motor y asegurarte de que las librerías nativas estén en tu `LD_LIBRARY_PATH`.
+Sigue las instrucciones oficiales de [VizDoom](https://github.com/mwydmuch/ViZDoom) para compilar el motor y asegurarte de que las librerías nativas estén en tu `LD_LIBRARY_PATH` o usar un entorno virtual de Python.
 
 ## Documentación
 
