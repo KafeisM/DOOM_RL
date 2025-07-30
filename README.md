@@ -46,7 +46,7 @@ Sigue las instrucciones oficiales de [VizDoom](https://github.com/mwydmuch/ViZDo
 
 Puedes consultar la memoria del TFG completo del proyecto en el siguiente documento:
 
-[Abrir documento PDF](./TFG_TL_DOOM_FINAL.pdf)
+[Abrir documento PDF](./TFG_RL_DOOM_FINAL.pdf)
 
 ## Referencias y Recursos
 
