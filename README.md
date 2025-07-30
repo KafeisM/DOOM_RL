@@ -42,6 +42,12 @@ pip install -r requirements.txt  # Incluye gymnasium vizdoom stable-baselines3 p
 ```
 Sigue las instrucciones oficiales de [VizDoom](https://github.com/mwydmuch/ViZDoom) para compilar el motor y asegurarte de que las librerías nativas estén en tu `LD_LIBRARY_PATH`.
 
+## Documentación
+
+Puedes consultar la memoria del TFG completo del proyecto en el siguiente documento:
+
+[Abrir documento PDF](./TFG_TL_DOOM_FINAL.pdf)
+
 ## Referencias y Recursos
 
 - [VizDoom](https://github.com/mwydmuch/ViZDoom)
